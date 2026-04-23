@@ -579,8 +579,59 @@ def calculate_pecarn(age_months, gcs, altered_mental_status,
                            preference'
            low          → 'CT scan NOT recommended'
     """
-    # TODO: Students — implement this function
-    raise NotImplementedError(
-        "calculate_pecarn() is not yet implemented. "
-        "Please implement this function according to the docstring."
-    )
+    # Validate inputs
+    if not (3 <= gcs <= 15):
+        raise ValueError("GCS must be between 3 and 15 inclusive.")
+    if scalp_hematoma_location not in ['frontal', 'non-frontal', 'none']:
+        raise ValueError("scalp_hematoma_location must be 'frontal', 'non-frontal', or 'none'.")
+    
+    if age_months < 24:
+        # Rules for children < 24 months
+        if gcs < 15 or palpable_skull_fracture or altered_mental_status:
+            risk_level = 'high'
+            recommendation = 'CT scan recommended'
+            interpretation = 'High risk of clinically important traumatic brain injury. CT scan recommended.'
+        elif (loss_of_consciousness or 
+              scalp_hematoma_location == 'non-frontal' or 
+              severe_mechanism or 
+              vomiting):
+            risk_level = 'intermediate'
+            recommendation = ('CT scan versus observation: individualise based on '
+                              'physician experience, multiple vs isolated findings, '
+                              'worsening symptoms, age < 3 months, parental preference')
+            interpretation = ('Intermediate risk of clinically important traumatic brain injury. '
+                              'CT scan versus observation: individualise based on physician experience, '
+                              'multiple vs isolated findings, worsening symptoms, age < 3 months, parental preference.')
+        else:
+            risk_level = 'low'
+            recommendation = 'CT scan NOT recommended'
+            interpretation = ('Low risk of clinically important traumatic brain injury (< 0.02%). '
+                              'CT scan NOT recommended.')
+    else:
+        # Rules for children >= 24 months
+        if gcs < 15 or signs_basal_skull_fracture or altered_mental_status:
+            risk_level = 'high'
+            recommendation = 'CT scan recommended'
+            interpretation = 'High risk of clinically important traumatic brain injury. CT scan recommended.'
+        elif (loss_of_consciousness or 
+              vomiting or 
+              severe_mechanism or 
+              severe_headache):
+            risk_level = 'intermediate'
+            recommendation = ('CT scan versus observation: individualise based on '
+                              'physician experience, multiple vs isolated findings, '
+                              'worsening symptoms, age < 3 months, parental preference')
+            interpretation = ('Intermediate risk of clinically important traumatic brain injury. '
+                              'CT scan versus observation: individualise based on physician experience, '
+                              'multiple vs isolated findings, worsening symptoms, age < 3 months, parental preference.')
+        else:
+            risk_level = 'low'
+            recommendation = 'CT scan NOT recommended'
+            interpretation = ('Low risk of clinically important traumatic brain injury (< 0.02%). '
+                              'CT scan NOT recommended.')
+    
+    return {
+        'risk_level': risk_level,
+        'recommendation': recommendation,
+        'interpretation': interpretation,
+    }
